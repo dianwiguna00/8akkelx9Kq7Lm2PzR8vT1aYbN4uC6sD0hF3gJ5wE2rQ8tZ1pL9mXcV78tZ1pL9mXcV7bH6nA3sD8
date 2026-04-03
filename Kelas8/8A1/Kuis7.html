@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Matematika</title>
+
+<style>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#74ebd5,#ACB6E5);
+margin:0;
+text-align:center;
+}
+
+.container{
+max-width:950px;
+margin:20px auto;
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.timer{
+font-size:24px;
+font-weight:bold;
+color:#d9534f;
+margin-bottom:10px;
+}
+
+.score-board{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:15px;
+}
+
+.team{
+padding:12px;
+background:#f0f0f0;
+border-radius:10px;
+font-size:18px;
+}
+
+.active{
+background:#c8f7c5;
+font-weight:bold;
+}
+
+.question{
+  font-size:24px;
+  text-align:left;
+  margin:10px 0;
+  white-space: pre-line;
+}
+
+.options{
+margin-top:20px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.optionBtn{
+padding:15px;
+font-size:20px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.btnA{background:#1E88E5;}
+.btnB{background:#43A047;}
+.btnC{background:#FB8C00;}
+.btnD{background:#8E24AA;}
+
+.correct{background:#2ecc71!important;}
+.wrong{background:#e74c3c!important;}
+
+button{
+margin:5px;
+padding:10px 20px;
+border:none;
+border-radius:10px;
+background:#4CAF50;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.feedback{
+font-size:22px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.pembahasan{
+display:none;
+margin-top:15px;
+padding:15px;
+background:#f9fbff;
+border-left:5px solid #2196F3;
+text-align:left;
+border-radius:10px;
+}
+.close{
+float:right;
+cursor:pointer;
+color:red;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🎮 Kuis Matematika</h1>
+<h3>Mengidentifikasi Domain, Kodomain, dan Range dari Suatu Relasi</h3>
+
+<div class="timer" id="timer">Waktu: 60:00</div>
+
+<div class="score-board">
+<div id="team1" class="team active"></div>
+<div id="team2" class="team"></div>
+<div id="team3" class="team"></div>
+<div id="team4" class="team"></div>
+</div>
+
+<div id="questionNumber"></div>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+
+<button onclick="nextQuestion()">Soal Berikut</button>
+<button onclick="switchTeam()">Ganti Regu</button>
+<button onclick="showPembahasan()">📘 Pembahasan</button>
+
+<div id="feedback" class="feedback"></div>
+
+<div id="pembahasan" class="pembahasan">
+<span class="close" onclick="closePembahasan()">✖</span>
+<b>Pembahasan</b>
+<div id="pembahasanText"></div>
+</div>
+</div>
+
+<script>
+let questions=[
+{
+q:"Diberikan relasi antara siswa dan nilai ulangan:\n- Andi → 80\n- Budi → 85\n- Citra → 90\nApa domain dari relasi tersebut?",
+options:["{80, 85, 90}","{Andi, Budi, Citra}","{Nilai Ulangan}","{Siswa dan Nilai}"],
+correct:"{Andi, Budi, Citra}",
+p:"Domain adalah himpunan semua input (unsur pertama) dari suatu relasi. Pada relasi tersebut, unsur pertamanya adalah nama siswa, yaitu Andi, Budi, dan Citra.",
+img:""
+},
+{
+q:"Relasi antara hari dan kegiatan:\n- Senin → Upacara\n- Selasa → Matematika\n- Rabu → IPA\n- Kamis → Bahasa\n- Jumat → Seni\nApa kodomain dari relasi tersebut?",
+options:["{Senin, Selasa, Rabu, Kamis, Jumat}","{Upacara, Matematika, IPA, Bahasa, Seni}","{Upacara, Matematika, IPA, Bahasa, Seni, Olahraga, Prakarya}","{Hari dan Kegiatan}"],
+correct:"{Upacara, Matematika, IPA, Bahasa, Seni, Olahraga, Prakarya}",
+p:"Kodomain adalah himpunan semua nilai yang mungkin menjadi pasangan dari domain, baik yang muncul maupun tidak muncul dalam relasi. Karena kegiatan yang mungkin lebih luas dari yang tercantum, kodomainnya mencakup semua kegiatan yang mungkin.",
+img:""
+},
+{
+q:"Dalam relasi antara siswa dan ekstrakurikuler yang diikuti:\n- Dika → Basket\n- Rani → Tari\n- Sinta → Basket\nApa range dari relasi tersebut?",
+options:["{Dika, Rani, Sinta}","{Basket, Tari}","{Basket, Tari, Musik}","{Ekstrakurikuler}"],
+correct:"{Basket, Tari}",
+p:"Range adalah himpunan semua output yang benar-benar muncul dalam relasi. Dari data tersebut, kegiatan yang muncul hanyalah Basket dan Tari.",
+img:""
+},
+{
+q:"Relasi antara nomor rumah dan pemilik rumah:\n- 01 → Pak Budi\n- 02 → Bu Rina\n- 03 → Pak Joko\nApakah relasi tersebut merupakan fungsi?",
+options:["Ya, karena setiap nomor rumah memiliki satu pemilik","Tidak, karena satu pemilik bisa memiliki banyak rumah","Ya, karena semua rumah memiliki pemilik","Tidak, karena rumah bisa kosong"],
+correct:"Ya, karena setiap nomor rumah memiliki satu pemilik",
+p:"Suatu relasi disebut fungsi jika setiap elemen domain memiliki tepat satu pasangan di kodomain. Dalam relasi tersebut, setiap nomor rumah dipasangkan dengan satu pemilik, sehingga relasi ini adalah fungsi.",
+img:""
+},
+{
+q:"Diberikan relasi:\n- A → 75\n- B → 80\n- C → 90\nDomain dari relasi tersebut adalah ...",
+options:["{75, 80, 90}","{A, B, C}","{Nilai siswa}","{0–100}"],
+correct:"{A, B, C}",
+p:"Domain adalah himpunan semua elemen pertama pada relasi. Pada relasi ini, elemen pertamanya adalah A, B, dan C.",
+img:""
+}
+
+];
+
+let currentQuestion=0;
+let scores=[0,0,0,0];
+let wrongs=[0,0,0,0];
+let currentTeam=0;
+let answered=new Array(questions.length).fill(false);
+let quizFinished=false;
+
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}}
+
+function showQuestion(){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+let opsi=[...q.options];
+shuffle(opsi);
+
+q.correctIndex=opsi.indexOf(q.correct);
+q.correctLetter=String.fromCharCode(65+q.correctIndex);
+
+document.getElementById("question").textContent=q.q;
+document.getElementById("questionNumber").textContent=
+`Soal ${currentQuestion+1} dari ${questions.length}`;
+
+let html="";
+opsi.forEach((o,i)=>{
+let letter=String.fromCharCode(65+i);
+let btnClass=["btnA","btnB","btnC","btnD"][i];
+html+=`<button class="optionBtn ${btnClass}"
+onclick="checkAnswer('${letter}','${o}',this)">
+${letter}. ${o}</button>`;
+});
+document.getElementById("options").innerHTML=html;
+document.getElementById("feedback").textContent="";
+closePembahasan();
+}
+
+function checkAnswer(letter,text,btn){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+document.querySelectorAll(".optionBtn").forEach(b=>b.disabled=true);
+
+if(text===q.correct){
+btn.classList.add("correct");
+scores[currentTeam]++;
+answered[currentQuestion]=true;
+document.getElementById("feedback").textContent="✅ Benar";
+}else{
+btn.classList.add("wrong");
+wrongs[currentTeam]++;
+document.getElementById("feedback").textContent="❌ Salah";
+}
+
+updateScore();
+
+setTimeout(()=>{
+if(answered.every(v=>v)){
+endQuiz();
+}else nextQuestion();
+},800);
+}
+
+function nextQuestion(){
+let start=currentQuestion;
+do{
+currentQuestion=(currentQuestion+1)%questions.length;
+}while(answered[currentQuestion] && currentQuestion!==start);
+showQuestion();
+}
+
+function endQuiz(){
+quizFinished=true;
+clearInterval(timer);
+document.getElementById("question").innerHTML="🏁 <b>KUIS SELESAI</b>";
+document.getElementById("options").innerHTML="";
+document.getElementById("feedback").innerHTML=showWinners();
+}
+
+function showWinners(){
+let rank=[0,1,2,3].map(i=>({
+team:i+1,
+score:scores[i]-wrongs[i]
+}));
+rank.sort((a,b)=>b.score-a.score);
+
+let html="<h2>🏆 Pengumuman Juara</h2>";
+rank.forEach((r,i)=>{
+html+=`<p>Juara ${i+1}: <b>Regu ${r.team}</b> (Skor ${r.score})</p>`;
+});
+return html;
+}
+
+function updateScore(){
+for(let i=0;i<4;i++){
+document.getElementById("team"+(i+1)).textContent=
+`Regu ${i+1} | Benar: ${scores[i]} | Salah: ${wrongs[i]} | Skor: ${scores[i]-wrongs[i]}`;
+}}
+
+function switchTeam(){
+document.getElementById("team"+(currentTeam+1)).classList.remove("active");
+currentTeam=(currentTeam+1)%4;
+document.getElementById("team"+(currentTeam+1)).classList.add("active");
+}
+
+function showPembahasan(){
+document.getElementById("pembahasanText").textContent=
+questions[currentQuestion].p;
+document.getElementById("pembahasan").style.display="block";
+}
+
+function closePembahasan(){
+document.getElementById("pembahasan").style.display="none";
+}
+
+let timeLeft=3600;
+let timer=setInterval(()=>{
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
+if(s<10)s="0"+s;
+document.getElementById("timer").textContent=`Waktu: ${m}:${s}`;
+timeLeft--;
+if(timeLeft<0){
+document.getElementById("timer").textContent="⏰ Waktu Habis";
+endQuiz();
+}},1000);
+
+shuffle(questions);
+updateScore();
+showQuestion();
+</script>
+
+<h3>Dian Wiguna</h3>
+</body>
+</html>

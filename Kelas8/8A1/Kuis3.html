@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Matematika</title>
+
+<style>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#74ebd5,#ACB6E5);
+margin:0;
+text-align:center;
+}
+
+.container{
+max-width:950px;
+margin:20px auto;
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.timer{
+font-size:24px;
+font-weight:bold;
+color:#d9534f;
+margin-bottom:10px;
+}
+
+.score-board{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:15px;
+}
+
+.team{
+padding:12px;
+background:#f0f0f0;
+border-radius:10px;
+font-size:18px;
+}
+
+.active{
+background:#c8f7c5;
+font-weight:bold;
+}
+
+.question{
+  font-size:24px;
+  text-align:left;
+  margin:10px 0;
+  white-space: pre-line;
+}
+
+.options{
+margin-top:20px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.optionBtn{
+padding:15px;
+font-size:20px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.btnA{background:#1E88E5;}
+.btnB{background:#43A047;}
+.btnC{background:#FB8C00;}
+.btnD{background:#8E24AA;}
+
+.correct{background:#2ecc71!important;}
+.wrong{background:#e74c3c!important;}
+
+button{
+margin:5px;
+padding:10px 20px;
+border:none;
+border-radius:10px;
+background:#4CAF50;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.feedback{
+font-size:22px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.pembahasan{
+display:none;
+margin-top:15px;
+padding:15px;
+background:#f9fbff;
+border-left:5px solid #2196F3;
+text-align:left;
+border-radius:10px;
+}
+.close{
+float:right;
+cursor:pointer;
+color:red;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🎮 Kuis Matematika</h1>
+<h3>Menentukan Suku ke-n dari Suatu Pola Bilangan</h3>
+
+<div class="timer" id="timer">Waktu: 60:00</div>
+
+<div class="score-board">
+<div id="team1" class="team active"></div>
+<div id="team2" class="team"></div>
+<div id="team3" class="team"></div>
+<div id="team4" class="team"></div>
+</div>
+
+<div id="questionNumber"></div>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+
+<button onclick="nextQuestion()">Soal Berikut</button>
+<button onclick="switchTeam()">Ganti Regu</button>
+<button onclick="showPembahasan()">📘 Pembahasan</button>
+
+<div id="feedback" class="feedback"></div>
+
+<div id="pembahasan" class="pembahasan">
+<span class="close" onclick="closePembahasan()">✖</span>
+<b>Pembahasan</b>
+<div id="pembahasanText"></div>
+</div>
+</div>
+
+<script>
+let questions=[
+{
+q:"Diketahui pola bilangan: 5, 9, 13, 17, ...\nBerapakah suku ke-10 dari pola tersebut?",
+options:["41","43","45","47"],
+correct:"41",
+p:"Pola bilangan tersebut adalah pola aritmetika dengan suku pertama a = 5 dan beda d = 4. Rumus suku ke-n adalah Un = a + (n - 1)d = 5 + (n - 1)×4 = 4n + 1. Suku ke-10 adalah U10 = 4×10 + 1 = 41.",
+img:""
+},
+{
+q:"Diketahui pola bilangan: 2, 6, 10, 14, ...\nRumus suku ke-n dari pola tersebut adalah ...",
+options:["Un = 4n","Un = 2n + 2","Un = 4n - 2","Un = 2n + 4"],
+correct:"Un = 4n - 2",
+p:"Pola aritmetika dengan suku pertama a = 2 dan beda d = 4. Rumus umum Un = a + (n - 1)d = 2 + (n - 1)×4 = 4n - 2.",
+img:""
+},
+{
+q:"Diketahui pola bilangan: 7, 11, 15, 19, ...\nTentukan suku ke-20 dari pola tersebut!",
+options:["83","85","87","89"],
+correct:"83",
+p:"Pola ini merupakan pola aritmetika dengan a = 7 dan d = 4. Rumusnya Un = 7 + (n - 1)×4 = 4n + 3. Suku ke-20 adalah U20 = 4×20 + 3 = 83.",
+img:""
+},
+{
+q:"Diketahui pola bilangan: 3, 8, 13, 18, ...\nTentukan rumus suku ke-n dari pola tersebut!",
+options:["Un = 5n - 2","Un = 4n + 1","Un = 5n - 1","Un = 6n - 3"],
+correct:"Un = 5n - 2",
+p:"Pola aritmetika dengan a = 3 dan beda d = 5. Rumus suku ke-n adalah Un = a + (n - 1)d = 3 + (n - 1)×5 = 5n - 2..",
+img:""
+},
+{
+q:"Diketahui pola bilangan: 10, 20, 30, 40, ...\nTentukan suku ke-25 dari pola tersebut!",
+options:["240","250","260","270"],
+correct:"250",
+p:"Pola tersebut adalah pola aritmetika dengan a = 10 dan d = 10. Rumus suku ke-n adalah Un = 10n. Suku ke-25 adalah U25 = 10 × 25 = 250.",
+img:""
+}
+
+];
+
+let currentQuestion=0;
+let scores=[0,0,0,0];
+let wrongs=[0,0,0,0];
+let currentTeam=0;
+let answered=new Array(questions.length).fill(false);
+let quizFinished=false;
+
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}}
+
+function showQuestion(){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+let opsi=[...q.options];
+shuffle(opsi);
+
+q.correctIndex=opsi.indexOf(q.correct);
+q.correctLetter=String.fromCharCode(65+q.correctIndex);
+
+document.getElementById("question").textContent=q.q;
+document.getElementById("questionNumber").textContent=
+`Soal ${currentQuestion+1} dari ${questions.length}`;
+
+let html="";
+opsi.forEach((o,i)=>{
+let letter=String.fromCharCode(65+i);
+let btnClass=["btnA","btnB","btnC","btnD"][i];
+html+=`<button class="optionBtn ${btnClass}"
+onclick="checkAnswer('${letter}','${o}',this)">
+${letter}. ${o}</button>`;
+});
+document.getElementById("options").innerHTML=html;
+document.getElementById("feedback").textContent="";
+closePembahasan();
+}
+
+function checkAnswer(letter,text,btn){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+document.querySelectorAll(".optionBtn").forEach(b=>b.disabled=true);
+
+if(text===q.correct){
+btn.classList.add("correct");
+scores[currentTeam]++;
+answered[currentQuestion]=true;
+document.getElementById("feedback").textContent="✅ Benar";
+}else{
+btn.classList.add("wrong");
+wrongs[currentTeam]++;
+document.getElementById("feedback").textContent="❌ Salah";
+}
+
+updateScore();
+
+setTimeout(()=>{
+if(answered.every(v=>v)){
+endQuiz();
+}else nextQuestion();
+},800);
+}
+
+function nextQuestion(){
+let start=currentQuestion;
+do{
+currentQuestion=(currentQuestion+1)%questions.length;
+}while(answered[currentQuestion] && currentQuestion!==start);
+showQuestion();
+}
+
+function endQuiz(){
+quizFinished=true;
+clearInterval(timer);
+document.getElementById("question").innerHTML="🏁 <b>KUIS SELESAI</b>";
+document.getElementById("options").innerHTML="";
+document.getElementById("feedback").innerHTML=showWinners();
+}
+
+function showWinners(){
+let rank=[0,1,2,3].map(i=>({
+team:i+1,
+score:scores[i]-wrongs[i]
+}));
+rank.sort((a,b)=>b.score-a.score);
+
+let html="<h2>🏆 Pengumuman Juara</h2>";
+rank.forEach((r,i)=>{
+html+=`<p>Juara ${i+1}: <b>Regu ${r.team}</b> (Skor ${r.score})</p>`;
+});
+return html;
+}
+
+function updateScore(){
+for(let i=0;i<4;i++){
+document.getElementById("team"+(i+1)).textContent=
+`Regu ${i+1} | Benar: ${scores[i]} | Salah: ${wrongs[i]} | Skor: ${scores[i]-wrongs[i]}`;
+}}
+
+function switchTeam(){
+document.getElementById("team"+(currentTeam+1)).classList.remove("active");
+currentTeam=(currentTeam+1)%4;
+document.getElementById("team"+(currentTeam+1)).classList.add("active");
+}
+
+function showPembahasan(){
+document.getElementById("pembahasanText").textContent=
+questions[currentQuestion].p;
+document.getElementById("pembahasan").style.display="block";
+}
+
+function closePembahasan(){
+document.getElementById("pembahasan").style.display="none";
+}
+
+let timeLeft=3600;
+let timer=setInterval(()=>{
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
+if(s<10)s="0"+s;
+document.getElementById("timer").textContent=`Waktu: ${m}:${s}`;
+timeLeft--;
+if(timeLeft<0){
+document.getElementById("timer").textContent="⏰ Waktu Habis";
+endQuiz();
+}},1000);
+
+shuffle(questions);
+updateScore();
+showQuestion();
+</script>
+
+<h3>Dian Wiguna</h3>
+</body>
+</html>

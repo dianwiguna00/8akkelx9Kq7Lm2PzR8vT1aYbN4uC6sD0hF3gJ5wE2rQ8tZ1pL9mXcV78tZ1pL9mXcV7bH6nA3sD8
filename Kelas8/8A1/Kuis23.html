@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Matematika</title>
+
+<style>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#74ebd5,#ACB6E5);
+margin:0;
+text-align:center;
+}
+
+.container{
+max-width:950px;
+margin:20px auto;
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.timer{
+font-size:24px;
+font-weight:bold;
+color:#d9534f;
+margin-bottom:10px;
+}
+
+.score-board{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:15px;
+}
+
+.team{
+padding:12px;
+background:#f0f0f0;
+border-radius:10px;
+font-size:18px;
+}
+
+.active{
+background:#c8f7c5;
+font-weight:bold;
+}
+
+.question{
+  font-size:24px;
+  text-align:left;
+  margin:10px 0;
+  white-space: pre-line;
+}
+
+.options{
+margin-top:20px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.optionBtn{
+padding:15px;
+font-size:20px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.btnA{background:#1E88E5;}
+.btnB{background:#43A047;}
+.btnC{background:#FB8C00;}
+.btnD{background:#8E24AA;}
+
+.correct{background:#2ecc71!important;}
+.wrong{background:#e74c3c!important;}
+
+button{
+margin:5px;
+padding:10px 20px;
+border:none;
+border-radius:10px;
+background:#4CAF50;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.feedback{
+font-size:22px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.pembahasan{
+display:none;
+margin-top:15px;
+padding:15px;
+background:#f9fbff;
+border-left:5px solid #2196F3;
+text-align:left;
+border-radius:10px;
+}
+.close{
+float:right;
+cursor:pointer;
+color:red;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🎮 Kuis Matematika</h1>
+<h3>SPLDV: Perbandingan Harga dan Jumlah</h3>
+
+<div class="timer" id="timer">Waktu: 60:00</div>
+
+<div class="score-board">
+<div id="team1" class="team active"></div>
+<div id="team2" class="team"></div>
+<div id="team3" class="team"></div>
+<div id="team4" class="team"></div>
+</div>
+
+<div id="questionNumber"></div>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+
+<button onclick="nextQuestion()">Soal Berikut</button>
+<button onclick="switchTeam()">Ganti Regu</button>
+<button onclick="showPembahasan()">📘 Pembahasan</button>
+
+<div id="feedback" class="feedback"></div>
+
+<div id="pembahasan" class="pembahasan">
+<span class="close" onclick="closePembahasan()">✖</span>
+<b>Pembahasan</b>
+<div id="pembahasanText"></div>
+</div>
+</div>
+
+<script>
+let questions=[
+{
+q:"Seorang siswa membeli 2 buku tulis dan 3 pensil seharga Rp21.000. Temannya membeli 4 buku tulis dan 1 pensil seharga Rp25.000. Berapakah harga sebuah buku tulis dan sebuah pensil?",
+options:["Buku tulis Rp4.000, Pensil Rp3.000","Buku tulis Rp5.400, Pensil Rp3.400","Buku tulis Rp6.000, Pensil Rp2.000","Buku tulis Rp5.000, Pensil Rp2.000"],
+correct:"Buku tulis Rp5.400, Pensil Rp3.400",
+p:"Misalkan x = harga buku tulis dan y = harga pensil. Diperoleh SPLDV: 2x + 3y = 21000 dan 4x + y = 25000. Mengeliminasi y dengan mengalikan persamaan kedua dengan 3 memberi 12x + 3y = 75000. Dikurangi persamaan pertama diperoleh 10x = 54000 sehingga x = 5400. Substitusi memberi y = 3400.",
+img:""
+},
+{
+q:"Seorang ibu membeli 3 kg apel dan 2 kg jeruk seharga Rp60.000. Temannya membeli 2 kg apel dan 4 kg jeruk seharga Rp70.000. Berapakah harga per kg apel dan jeruk?",
+options:["Apel Rp10.000, Jeruk Rp15.000","Apel Rp15.000, Jeruk Rp10.000","Apel Rp12.500, Jeruk Rp11.250","Apel Rp14.000, Jeruk Rp12.000"],
+correct:"Apel Rp12.500, Jeruk Rp11.250",
+p:"Misalkan x = harga apel/kg dan y = harga jeruk/kg. Diperoleh SPLDV: 3x + 2y = 60000 dan 2x + 4y = 70000. Dengan eliminasi diperoleh x = 12500 dan y = 11250.",
+img:""
+},
+{
+q:"Seorang siswa membeli 5 buku dan 2 penggaris seharga Rp40.000. Temannya membeli 3 buku dan 4 penggaris seharga Rp38.000. Berapakah harga sebuah buku dan sebuah penggaris?",
+options:["Buku Rp6.000, Penggaris Rp5.000","Buku Rp7.000, Penggaris Rp4.000","Buku Rp8.000, Penggaris Rp3.000","Buku Rp5.000, Penggaris Rp6.000"],
+correct:"Buku Rp6.000, Penggaris Rp5.000",
+p:"Misalkan x = harga buku dan y = harga penggaris. Diperoleh SPLDV: 5x + 2y = 40000 dan 3x + 4y = 38000. Dengan eliminasi diperoleh x = 6000 dan y = 5000. Jadi jawaban yang benar adalah opsi A",
+img:""
+},
+{
+q:"Seorang pedagang menjual 2 kg gula dan 3 liter minyak seharga Rp49.000. Temannya membeli 4 kg gula dan 1 liter minyak seharga Rp47.000. Berapakah harga per kg gula dan per liter minyak?",
+options:["Gula Rp9.200, Minyak Rp10.200","Gula Rp11.000, Minyak Rp7.000","Gula Rp12.000, Minyak Rp5.000","Gula Rp13.000, Minyak Rp4.000"],
+correct:"Gula Rp9.200, Minyak Rp10.200",
+p:"Misalkan x = harga gula/kg dan y = harga minyak/liter. Diperoleh SPLDV: 2x + 3y = 49000 dan 4x + y = 47000. Dengan eliminasi diperoleh x = 9200 dan y = 10200.",
+img:""
+},
+{
+q:"Seorang siswa membeli 3 buku dan 2 pensil seharga Rp27.000. Temannya membeli 2 buku dan 4 pensil seharga Rp28.000. Berapakah harga sebuah buku dan sebuah pensil?",
+options:["Buku Rp6.500, Pensil Rp3.750","Buku Rp7.000, Pensil Rp3.000","Buku Rp8.000, Pensil Rp2.000","Buku Rp5.000, Pensil Rp5.000"],
+correct:"Buku Rp6.500, Pensil Rp3.750",
+p:"Misalkan x = harga buku dan y = harga pensil. Diperoleh SPLDV: 3x + 2y = 27000 dan 2x + 4y = 28000. Dengan eliminasi diperoleh x = 6500 dan y = 3750.",
+img:""
+}
+
+];
+
+let currentQuestion=0;
+let scores=[0,0,0,0];
+let wrongs=[0,0,0,0];
+let currentTeam=0;
+let answered=new Array(questions.length).fill(false);
+let quizFinished=false;
+
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}}
+
+function showQuestion(){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+let opsi=[...q.options];
+shuffle(opsi);
+
+q.correctIndex=opsi.indexOf(q.correct);
+q.correctLetter=String.fromCharCode(65+q.correctIndex);
+
+document.getElementById("question").textContent=q.q;
+document.getElementById("questionNumber").textContent=
+`Soal ${currentQuestion+1} dari ${questions.length}`;
+
+let html="";
+opsi.forEach((o,i)=>{
+let letter=String.fromCharCode(65+i);
+let btnClass=["btnA","btnB","btnC","btnD"][i];
+html+=`<button class="optionBtn ${btnClass}"
+onclick="checkAnswer('${letter}','${o}',this)">
+${letter}. ${o}</button>`;
+});
+document.getElementById("options").innerHTML=html;
+document.getElementById("feedback").textContent="";
+closePembahasan();
+}
+
+function checkAnswer(letter,text,btn){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+document.querySelectorAll(".optionBtn").forEach(b=>b.disabled=true);
+
+if(text===q.correct){
+btn.classList.add("correct");
+scores[currentTeam]++;
+answered[currentQuestion]=true;
+document.getElementById("feedback").textContent="✅ Benar";
+}else{
+btn.classList.add("wrong");
+wrongs[currentTeam]++;
+document.getElementById("feedback").textContent="❌ Salah";
+}
+
+updateScore();
+
+setTimeout(()=>{
+if(answered.every(v=>v)){
+endQuiz();
+}else nextQuestion();
+},800);
+}
+
+function nextQuestion(){
+let start=currentQuestion;
+do{
+currentQuestion=(currentQuestion+1)%questions.length;
+}while(answered[currentQuestion] && currentQuestion!==start);
+showQuestion();
+}
+
+function endQuiz(){
+quizFinished=true;
+clearInterval(timer);
+document.getElementById("question").innerHTML="🏁 <b>KUIS SELESAI</b>";
+document.getElementById("options").innerHTML="";
+document.getElementById("feedback").innerHTML=showWinners();
+}
+
+function showWinners(){
+let rank=[0,1,2,3].map(i=>({
+team:i+1,
+score:scores[i]-wrongs[i]
+}));
+rank.sort((a,b)=>b.score-a.score);
+
+let html="<h2>🏆 Pengumuman Juara</h2>";
+rank.forEach((r,i)=>{
+html+=`<p>Juara ${i+1}: <b>Regu ${r.team}</b> (Skor ${r.score})</p>`;
+});
+return html;
+}
+
+function updateScore(){
+for(let i=0;i<4;i++){
+document.getElementById("team"+(i+1)).textContent=
+`Regu ${i+1} | Benar: ${scores[i]} | Salah: ${wrongs[i]} | Skor: ${scores[i]-wrongs[i]}`;
+}}
+
+function switchTeam(){
+document.getElementById("team"+(currentTeam+1)).classList.remove("active");
+currentTeam=(currentTeam+1)%4;
+document.getElementById("team"+(currentTeam+1)).classList.add("active");
+}
+
+function showPembahasan(){
+document.getElementById("pembahasanText").textContent=
+questions[currentQuestion].p;
+document.getElementById("pembahasan").style.display="block";
+}
+
+function closePembahasan(){
+document.getElementById("pembahasan").style.display="none";
+}
+
+let timeLeft=3600;
+let timer=setInterval(()=>{
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
+if(s<10)s="0"+s;
+document.getElementById("timer").textContent=`Waktu: ${m}:${s}`;
+timeLeft--;
+if(timeLeft<0){
+document.getElementById("timer").textContent="⏰ Waktu Habis";
+endQuiz();
+}},1000);
+
+shuffle(questions);
+updateScore();
+showQuestion();
+</script>
+
+<h3>Dian Wiguna</h3>
+</body>
+</html>
